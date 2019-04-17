@@ -1,0 +1,83 @@
+---
+title: "team"
+author: "Allegra Frickel"
+date: "4/17/2019"
+output: html_document
+---
+
+```{r}
+acc <- read.csv("https://raw.githubusercontent.com/xdaiISU/ds202materials/master/hwlabs/fars2017/accident.csv", stringsAsFactors = FALSE)
+names(acc)
+acc
+```
+
+```{r}
+per <- read.csv("https://raw.githubusercontent.com/xdaiISU/ds202materials/master/hwlabs/fars2017/person.csv", stringsAsFactors = FALSE)
+names(per)
+per
+```
+
+**Part One: Accident Data**
+
+Are there some days of the week where more accidents happen than on others (use variable DAY_WEEK)?
+
+```{r}
+library(ggplot2)
+library(dplyr)
+ggplot(acc, aes(x=DAY_WEEK)) + geom_bar()
+```
+
+According to the barchart, Saturdays and Sundays are more prone to accidents. This may be because these are travel days for some, days to run errands, etc. In other words, more people are out using the roads.
+
+What time of the day do accidents happen (use variable HOUR)?
+
+```{r}
+ggplot(acc, aes(x=HOUR)) + geom_bar()
+```
+
+According to the bar chart, the later evenings from 6 to 10 p.m. are more prone to accidents.
+
+What is the number of accidents with at least one drunk driver (use variable DRUNK_DR)?
+
+```{r}
+sum(acc$DRUNK_DR >= 1)
+```
+
+There are 8769 accidents with at least one drunk driver in this dataset.
+
+**Part Two: Connecting Data**
+
+Identify drivers (PER_TYP == 1) and subset on them.
+
+```{r}
+per1 <- per %>% filter(PER_TYP == 1)
+```
+
+Join accident and driver table (work out which variable(s) to use).
+
+```{r}
+inner_join(acc, per, by = c("COUNTY", "DAY", "MONTH"))
+```
+
+Tally the number of accidents by day of the week (DAY_WEEK), hour of the day (HOUR) and gender (SEX). Visualize results.
+
+```{r}
+ggplot(acc, aes(x=DAY_WEEK)) + geom_bar()
+```
+
+```{r}
+ggplot(acc, aes(x=HOUR)) + geom_bar()
+```
+
+```{r}
+ggplot(per, aes(x=SEX)) + geom_bar()
+```
+
+**Part Three: Connecting data and make maps**
+
+Plot a choropleth map of accidents on a county level.
+
+Visualize the number of accidents in each county using a choropleth map. Join the accident data, GLCs, appropriate map data.
+
+Can you find seasonal trends in accident occurrences in different states? Is summer or winter more dangerous? Why?
+
