@@ -75,9 +75,31 @@ ggplot(per, aes(x=SEX)) + geom_bar()
 
 **Part Three: Connecting data and make maps**
 
+```{r}
+#will need to download the excel file from the link on the slides
+library(readxl)
+states <- read_excel('FRPP GLC United States.xlsx')
+str(states)
+states
+```
+
+```{r}
+#will need to download the excel file from the link on the slides
+territories <- read_excel('FRPP GLC US Territories.xlsx')
+str(territories)
+territories
+```
+
 Plot a choropleth map of accidents on a county level.
 
 Visualize the number of accidents in each county using a choropleth map. Join the accident data, GLCs, appropriate map data.
 
 Can you find seasonal trends in accident occurrences in different states? Is summer or winter more dangerous? Why?
 
+Can you find seasonal trends in accident occurrences in different states? Is summer or winter more dangerous? Why?
+
+```{r}
+ggplot(accdriver, aes(x= MONTH)) + geom_bar()
+```
+
+June, July, September October look to be the months with the most accidents. I would expect June and July because of it being summer time in the United States. In other words, there are more people going on vacations and travelling, leading to a higher chance of accidents occuring.
