@@ -98,13 +98,17 @@ territories = territories[-1, ]
 Join:
 change State$`State Code` to numeric, same with county code
 ```{r}
-states$`State Code` <- as.numeric(states$`State Code`)
-states$`County Code` <- as.numeric(states$`County Code`)
-states$`Country Code` <- as.numeric(states$`Country Code`)
-states$`City Code` <- as.numeric(states$`City Code`)
+states$STATE <- as.numeric(states$`State Code`)
+states$COUNTY <- as.numeric(states$`County Code`)
+states$CITY <- as.numeric(states$`City Code`)
 ```
 
 Plot a choropleth map of accidents on a county level.
+```{r}
+states %>% ggplot(aes(x = long, y = lat)) + 
+  geom_path()
+
+```
 
 Visualize the number of accidents in each county using a choropleth map. Join the accident data, GLCs, appropriate map data.
 
