@@ -1,0 +1,119 @@
+---
+title: "team"
+author: "Allegra Frickel"
+date: "4/17/2019"
+output: html_document
+---
+
+```{r}
+acc <- read.csv("https://raw.githubusercontent.com/xdaiISU/ds202materials/master/hwlabs/fars2017/accident.csv", stringsAsFactors = FALSE)
+names(acc)
+acc
+```
+
+```{r}
+per <- read.csv("https://raw.githubusercontent.com/xdaiISU/ds202materials/master/hwlabs/fars2017/person.csv", stringsAsFactors = FALSE)
+names(per)
+per
+```
+
+**Part One: Accident Data**
+
+Are there some days of the week where more accidents happen than on others (use variable DAY_WEEK)?
+
+```{r}
+library(ggplot2)
+library(dplyr)
+ggplot(acc, aes(x=DAY_WEEK)) + geom_bar() + labs(title='Accidents by Day of the Week')
+```
+
+According to the barchart, Saturdays and Sundays are more prone to accidents. This may be because these are travel days for some, days to run errands, etc. In other words, more people are out using the roads.
+
+What time of the day do accidents happen (use variable HOUR)?
+
+```{r}
+acc %>% filter(HOUR <25) %>%
+  ggplot(aes(x=HOUR)) + geom_bar()
+```
+
+According to the bar chart, the later evenings from 5 to 9 p.m. are more prone to accidents.
+
+What is the number of accidents with at least one drunk driver (use variable DRUNK_DR)?
+
+```{r}
+sum(acc$DRUNK_DR >= 1)
+```
+
+There are 8769 accidents with at least one drunk driver in this dataset.
+
+
+**Part Two: Connecting Data**
+
+Identify drivers (PER_TYP == 1) and subset on them.
+
+```{r}
+per1 <- per %>% filter(PER_TYP == 1)
+```
+
+Join accident and driver table (work out which variable(s) to use).
+
+```{r}
+inner_join(acc, per, by = c("COUNTY", "DAY", "MONTH"))
+```
+
+Tally the number of accidents by day of the week (DAY_WEEK), hour of the day (HOUR) and gender (SEX). Visualize results.
+
+```{r}
+ggplot(acc, aes(x=DAY_WEEK)) + geom_bar()
+```
+
+```{r}
+acc %>% filter(HOUR < 25) %>% ggplot(aes(x=HOUR)) + geom_bar()
+```
+
+```{r}
+per %>% filter(SEX<3) %>% ggplot(aes(x=SEX)) + geom_bar()
+```
+
+**Part Three: Connecting data and make maps**
+
+```{r}
+#will need to download the excel file from the link on the slides
+library(readxl)
+states <- read_excel('FRPP GLC United States.xlsx')
+str(states)
+colnames(states) <- as.character(unlist(states[1,]))
+states = states[-1, ]
+```
+
+```{r}
+#will need to download the excel file from the link on the slides
+territories <- read_excel('FRPP GLC US Territories.xlsx')
+str(territories)
+territories
+colnames(territories) <- as.character(unlist(territories[1,]))
+territories = territories[-1, ]
+```
+
+Join:
+change State$`State Code` to numeric, same with county code
+```{r}
+states$`State Code` <- as.numeric(states$`State Code`)
+states$`County Code` <- as.numeric(states$`County Code`)
+states$`Country Code` <- as.numeric(states$`Country Code`)
+states$`City Code` <- as.numeric(states$`City Code`)
+```
+
+Plot a choropleth map of accidents on a county level.
+
+Visualize the number of accidents in each county using a choropleth map. Join the accident data, GLCs, appropriate map data.
+
+Can you find seasonal trends in accident occurrences in different states? Is summer or winter more dangerous? Why?
+
+Can you find seasonal trends in accident occurrences in different states? Is summer or winter more dangerous? Why?
+
+```{r}
+ggplot(accdriver, aes(x= MONTH)) + geom_bar()
+```
+
+June, July, September October look to be the months with the most accidents. I would expect June and July because of it being summer time in the United States. In other words, there are more people going on vacations and travelling, leading to a higher chance of accidents occuring.
