@@ -8,13 +8,11 @@ output: html_document
 ```{r}
 acc <- read.csv("https://raw.githubusercontent.com/xdaiISU/ds202materials/master/hwlabs/fars2017/accident.csv", stringsAsFactors = FALSE)
 names(acc)
-acc
 ```
 
 ```{r}
 per <- read.csv("https://raw.githubusercontent.com/xdaiISU/ds202materials/master/hwlabs/fars2017/person.csv", stringsAsFactors = FALSE)
 names(per)
-per
 ```
 
 **Part One: Accident Data**
@@ -57,7 +55,6 @@ Join accident and driver table (work out which variable(s) to use).
 
 ```{r}
 accdriver <- inner_join(acc, per, by = c("COUNTY", "DAY", "MONTH"))
-accdriver
 ```
 
 Tally the number of accidents by day of the week (DAY_WEEK), hour of the day (HOUR) and gender (SEX). Visualize results.
@@ -92,10 +89,14 @@ territories
 Plot a choropleth map of accidents on a county level.
 
 ```{r}
-#ggplot(joined, aes(x= long, y= lat)) + geom_polygon(aes(group=group))
+#ggplot(joined, aes(x= LONGITUD, y= LATITUDE)) + geom_polygon(aes(group=group))
 ```
 
 Visualize the number of accidents in each county using a choropleth map. Join the accident data, GLCs, appropriate map data.
+
+```{r}
+#ggplot(joined, aes(x= )) + geom_histogram() + facet_wrap(~`County Name`)
+```
 
 Can you find seasonal trends in accident occurrences in different states? Is summer or winter more dangerous? Why?
 
