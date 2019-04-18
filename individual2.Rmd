@@ -105,9 +105,16 @@ states$CITY <- as.numeric(states$`City Code`)
 
 Plot a choropleth map of accidents on a county level.
 ```{r}
-states %>% ggplot(aes(x = long, y = lat)) + 
-  geom_path()
+#acc %>% filter(LONGITUD <0) %>% 
+ # ggplot(aes(x = LONGITUD, y = LATITUDE)) + 
+  #geom_point()
+usmap <- map_data("county")
+map2 <- acc %>% left_join(states, by="COUNTY")
+map1 <- map2 %>% left_join(usmap, by="region")
 
+map %>% 
+  ggplot(aes(x = LONGITUD, y = LATITUDE)) +
+  geom_polygon(aes(group=COUNTY))
 ```
 
 Visualize the number of accidents in each county using a choropleth map. Join the accident data, GLCs, appropriate map data.
