@@ -1,6 +1,6 @@
 ---
-title: "team"
-author: "Allegra Frickel"
+title: "individual2"
+author: "Audrey Comer"
 date: "4/17/2019"
 output: html_document
 ---
@@ -109,8 +109,8 @@ Plot a choropleth map of accidents on a county level.
  # ggplot(aes(x = LONGITUD, y = LATITUDE)) + 
   #geom_point()
 usmap <- map_data("county")
-map2 <- acc %>% left_join(states, by="COUNTY")
-map1 <- map2 %>% left_join(usmap, by="region")
+map <- acc %>% left_join(states, by="COUNTY")
+#map1 <- map2 %>% left_join(usmap, by="region")
 
 map %>% 
   ggplot(aes(x = LONGITUD, y = LATITUDE)) +
@@ -124,7 +124,7 @@ Can you find seasonal trends in accident occurrences in different states? Is sum
 Can you find seasonal trends in accident occurrences in different states? Is summer or winter more dangerous? Why?
 
 ```{r}
-ggplot(accdriver, aes(x= MONTH)) + geom_bar()
+acc %>% ggplot(aes(x= MONTH)) + geom_bar()
 ```
 
 June, July, September October look to be the months with the most accidents. I would expect June and July because of it being summer time in the United States. In other words, there are more people going on vacations and travelling, leading to a higher chance of accidents occuring.
