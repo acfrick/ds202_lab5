@@ -77,54 +77,42 @@ ggplot(accdriver, aes(x=factor(HOUR.y), fill=factor(SEX))) + geom_bar() + facet_
 library(readxl)
 states <- readxl::read_xlsx('FRPP GLC United States.xlsx')
 str(states)
-```
-
-```{r}
-territories <- readxl::read_xlsx('FRPP GLC US Territories.xlsx')
-str(territories)
-colnames(territories) = territories[1, ]
-territories = territories[-1, ]
+colnames(states) = states[1, ]
+states <- states[-1, ]
 ```
 
 ```{r}
 counties <- map_data("county")
-names(territories) [6] = "COUNTY"
-names(territories) [7] = "County_Name"
-territories$COUNTY <- as.numeric(territories$COUNTY)
-territories$COUNTY = factor(territories$COUNTY)
-territories$`State Code` =  as.integer(territories$`State Code`) #FIX THIS
+names(states) [6] = "COUNTY"
+names(states) [7] = "County_Name"
+states$COUNTY <- as.numeric(states$COUNTY)
+states$COUNTY = factor(states$COUNTY)
+states$`State Code` =  as.integer(states$`State Code`)
 acc$COUNTY = factor(acc$COUNTY)
 names(counties) [6] = "County_Name"
-```
-
-Join:
-change State$`State Code` to numeric, same with county code
-```{r}
-states$STATE <- as.numeric(states$`State Code`)
-states$COUNTY <- as.numeric(states$`County Code`)
-states$CITY <- as.numeric(states$`City Code`)
 ```
 
 Plot a choropleth map of accidents on a county level. Visualize the number of accidents in each county using a choropleth map. Join the accident data, GLCs, appropriate map data.
 
 ```{r}
-dat <- inner_join(acc, territories, by = c("COUNTY"="COUNTY", "STATE" = "State Code")) %>% select(LATITUCE, LONGITUD, COUNTY, "County_Name", DAY, MONTH, YEAR, HOUR, "State Name") #FIX THIS
+dat <- inner_join(acc, states, by = c("COUNTY"="COUNTY", "STATE" = "State Code")) %>% select(LATITUDE, LONGITUD, COUNTY, "County_Name", DAY, MONTH, YEAR, HOUR, "State Name")
 ```
 
 ```{r}
 dat<- dat %>% mutate(County_Name = tolower(County_Name))
+dat <- dat %>% mutate("State Name" = tolower(dat$`State Name`))
 dat1 <- dat %>% group_by(County_Name) %>% summarise(crashes = n())
-dat1 <- left_join(dat1, counties, by = "County_Name") #FIX THIS
+dat1 <- left_join(dat1, counties, by = "County_Name", "State Name"="region")
 ```
 
 ```{r}
-dat1 %>% group_by("County_Name") %>% ggplot(aes(x = long, y = lat, fill=crashes)) + geom_polygon(aes(group=group)) #FIX THIS
+dat1 %>% group_by("County_Name") %>% ggplot(aes(x = long, y = lat, fill=crashes)) + geom_polygon(aes(group=group))
 ```
 
 Can you find seasonal trends in accident occurrences in different states? Is summer or winter more dangerous? Why?
 
 ```{r}
-acc %>% ggplot(aes(x= MONTH)) + geom_bar()
+ggplot(accdriver, aes(x= MONTH.x)) + geom_bar() + xlab('Month')
 ```
 
 June, July, September October look to be the months with the most accidents. I would expect June and July because of it being summer time in the United States. In other words, there are more people going on vacations and travelling, leading to a higher chance of accidents occuring.
