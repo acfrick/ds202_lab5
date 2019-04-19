@@ -1,0 +1,30 @@
+---
+title: "git log team"
+author: "Allegra Frickel"
+date: "4/19/2019"
+output: html_document
+---
+
+commit 2e3b33dde1a7d6769ad7f66b2d26d2ef9fb20fda (HEAD -> master, origin/master)
+Author: Allegra Frickel <africkel@iastate.edu>
+Date:   Fri Apr 19 10:41:05 2019 -0500
+
+    Ally
+
+commit df107cdd6d705cabbea473d97ac0850d369007b2
+Author: Allegra Frickel <africkel@iastate.edu>
+Date:   Fri Apr 19 10:39:43 2019 -0500
+
+    Ally
+
+commit bff8195a7f51dfa6276cc4eb9c8c841e63f6db53
+Author: Allegra Frickel <africkel@iastate.edu>
+Date:   Fri Apr 19 10:38:55 2019 -0500
+
+    Ally
+
+commit bbf1626a33c2aaf3c236707936745130617b6af7
+Author: Allegra Frickel <africkel@iastate.edu>
+Date:   Fri Apr 19 10:38:32 2019 -0500
+
+    Ally
