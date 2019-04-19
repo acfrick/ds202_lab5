@@ -8,13 +8,11 @@ output: html_document
 ```{r}
 acc <- read.csv("https://raw.githubusercontent.com/xdaiISU/ds202materials/master/hwlabs/fars2017/accident.csv", stringsAsFactors = FALSE)
 names(acc)
-acc
 ```
 
 ```{r}
 per <- read.csv("https://raw.githubusercontent.com/xdaiISU/ds202materials/master/hwlabs/fars2017/person.csv", stringsAsFactors = FALSE)
 names(per)
-per
 ```
 
 **Part One: Accident Data**
@@ -32,8 +30,7 @@ According to the barchart, Saturdays and Sundays are more prone to accidents. Th
 What time of the day do accidents happen (use variable HOUR)?
 
 ```{r}
-acc %>% filter(HOUR <25) %>%
-  ggplot(aes(x=HOUR)) + geom_bar()
+ggplot(acc, aes(x=HOUR)) + geom_bar()
 ```
 
 According to the bar chart, the later evenings from 5 to 9 p.m. are more prone to accidents.
@@ -58,41 +55,46 @@ per1 <- per %>% filter(PER_TYP == 1)
 Join accident and driver table (work out which variable(s) to use).
 
 ```{r}
-inner_join(acc, per, by = c("COUNTY", "DAY", "MONTH"))
+accdriver <- inner_join(per1, acc, by = c("ST_CASE"))
 ```
 
 Tally the number of accidents by day of the week (DAY_WEEK), hour of the day (HOUR) and gender (SEX). Visualize results.
 
 ```{r}
-ggplot(acc, aes(x=DAY_WEEK)) + geom_bar()
+accdriver$SEX <- factor(accdriver[,'SEX'])
+levels(accdriver$SEX)[levels(accdriver$SEX) > 2] <- "unknown"
+levels(accdriver$SEX) <- list("Male" = 1, 'Female'=2,"Unknown"='unknown')
 ```
 
 ```{r}
-acc %>% filter(HOUR < 25) %>% ggplot(aes(x=HOUR)) + geom_bar()
+ggplot(accdriver, aes(x=factor(HOUR.y), fill=factor(SEX))) + geom_bar() + facet_grid(DAY_WEEK~SEX, scales="free", space="free") + xlab("Hour of the Day") + ylab("Number of Crashes") + ggtitle("Crashes of the Week by Hour and Sex") + guides(fill=guide_legend("SEX")) + scale_fill_discrete(name = "SEX", labels = c("Male","Female","Unknown"))
 ```
 
-```{r}
-per %>% filter(SEX<3) %>% ggplot(aes(x=SEX)) + geom_bar()
-```
 
 **Part Three: Connecting data and make maps**
 
 ```{r}
-#will need to download the excel file from the link on the slides
 library(readxl)
-states <- read_excel('FRPP GLC United States.xlsx')
+states <- readxl::read_xlsx('FRPP GLC United States.xlsx')
 str(states)
-colnames(states) <- as.character(unlist(states[1,]))
-states = states[-1, ]
 ```
 
 ```{r}
-#will need to download the excel file from the link on the slides
-territories <- read_excel('FRPP GLC US Territories.xlsx')
+territories <- readxl::read_xlsx('FRPP GLC US Territories.xlsx')
 str(territories)
-territories
-colnames(territories) <- as.character(unlist(territories[1,]))
+colnames(territories) = territories[1, ]
 territories = territories[-1, ]
+```
+
+```{r}
+counties <- map_data("county")
+names(territories) [6] = "COUNTY"
+names(territories) [7] = "County_Name"
+territories$COUNTY <- as.numeric(territories$COUNTY)
+territories$COUNTY = factor(territories$COUNTY)
+territories$`State Code` =  as.integer(territories$`State Code`) #FIX THIS
+acc$COUNTY = factor(acc$COUNTY)
+names(counties) [6] = "County_Name"
 ```
 
 Join:
@@ -103,23 +105,21 @@ states$COUNTY <- as.numeric(states$`County Code`)
 states$CITY <- as.numeric(states$`City Code`)
 ```
 
-Plot a choropleth map of accidents on a county level.
-```{r}
-#acc %>% filter(LONGITUD <0) %>% 
- # ggplot(aes(x = LONGITUD, y = LATITUDE)) + 
-  #geom_point()
-usmap <- map_data("county")
-map2 <- acc %>% left_join(states, by="COUNTY")
-#map1 <- map2 %>% left_join(usmap, by="region")
+Plot a choropleth map of accidents on a county level. Visualize the number of accidents in each county using a choropleth map. Join the accident data, GLCs, appropriate map data.
 
-map2 %>% 
-  ggplot(aes(x = LONGITUD, y = LATITUDE)) +
-  geom_polygon(aes(group=COUNTY))
+```{r}
+dat <- inner_join(acc, territories, by = c("COUNTY"="COUNTY", "STATE" = "State Code")) %>% select(LATITUCE, LONGITUD, COUNTY, "County_Name", DAY, MONTH, YEAR, HOUR, "State Name") #FIX THIS
 ```
 
-Visualize the number of accidents in each county using a choropleth map. Join the accident data, GLCs, appropriate map data.
+```{r}
+dat<- dat %>% mutate(County_Name = tolower(County_Name))
+dat1 <- dat %>% group_by(County_Name) %>% summarise(crashes = n())
+dat1 <- left_join(dat1, counties, by = "County_Name") #FIX THIS
+```
 
-Can you find seasonal trends in accident occurrences in different states? Is summer or winter more dangerous? Why?
+```{r}
+dat1 %>% group_by("County_Name") %>% ggplot(aes(x = long, y = lat, fill=crashes)) + geom_polygon(aes(group=group)) #FIX THIS
+```
 
 Can you find seasonal trends in accident occurrences in different states? Is summer or winter more dangerous? Why?
 
