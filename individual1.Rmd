@@ -54,48 +54,61 @@ per1 <- per %>% filter(PER_TYP == 1)
 Join accident and driver table (work out which variable(s) to use).
 
 ```{r}
-accdriver <- inner_join(acc, per, by = c("COUNTY", "DAY", "MONTH"))
+accdriver <- inner_join(per1, acc, by = c("ST_CASE"))
 ```
 
 Tally the number of accidents by day of the week (DAY_WEEK), hour of the day (HOUR) and gender (SEX). Visualize results.
 
 ```{r}
-ggplot(acc, aes(x=DAY_WEEK)) + geom_bar()
+accdriver$SEX <- factor(accdriver[,'SEX'])
+levels(accdriver$SEX)[levels(accdriver$SEX) > 2] <- "unknown"
+levels(accdriver$SEX) <- list("Male" = 1, 'Female'=2,"Unknown"='unknown')
 ```
 
 ```{r}
-ggplot(acc, aes(x=HOUR)) + geom_bar()
-```
-
-```{r}
-ggplot(per, aes(x=SEX)) + geom_bar()
+ggplot(accdriver, aes(x=factor(HOUR.y), fill=factor(SEX))) + geom_bar() + facet_grid(DAY_WEEK~SEX, scales="free", space="free") + xlab("Hour of the Day") + ylab("Number of Crashes") + ggtitle("Crashes of the Week by Hour and Sex") + guides(fill=guide_legend("SEX")) + scale_fill_discrete(name = "SEX", labels = c("Male","Female","Unknown"))
 ```
 
 **Part Three: Connecting data and make maps**
 
 ```{r}
 library(readxl)
-states <- read_excel('FRPP GLC United States.xlsx')
+states <- readxl::read_xlsx('FRPP GLC United States.xlsx')
 str(states)
-states
 ```
 
 ```{r}
-territories <- read_excel('FRPP GLC US Territories.xlsx')
+territories <- readxl::read_xlsx('FRPP GLC US Territories.xlsx')
 str(territories)
-territories
+colnames(territories) = territories[1, ]
+territories = territories[-1, ]
 ```
 
-Plot a choropleth map of accidents on a county level.
-
 ```{r}
-#ggplot(joined, aes(x= LONGITUD, y= LATITUDE)) + geom_polygon(aes(group=group))
+counties <- map_data("county")
+names(territories) [6] = "COUNTY"
+names(territories) [7] = "County_Name"
+territories$COUNTY <- as.numeric(territories$COUNTY)
+territories$COUNTY = factor(territories$COUNTY)
+territories$`State Code` =  as.integer(territories$`State Code`)
+acc$COUNTY = factor(acc$COUNTY)
+names(counties) [6] = "County_Name"
 ```
 
-Visualize the number of accidents in each county using a choropleth map. Join the accident data, GLCs, appropriate map data.
+Plot a choropleth map of accidents on a county level. Visualize the number of accidents in each county using a choropleth map. Join the accident data, GLCs, appropriate map data.
 
 ```{r}
-#ggplot(joined, aes(x= )) + geom_histogram() + facet_wrap(~`County Name`)
+dat <- inner_join(acc, territories, by = c("COUNTY"="COUNTY", "STATE" = "State Code")) %>% select(LATITUCE, LONGITUD, COUNTY, "County_Name", DAY, MONTH, YEAR, HOUR, "State Name")
+```
+
+```{r}
+dat<- dat %>% mutate(County_Name = tolower(County_Name))
+dat1 <- dat %>% group_by(County_Name) %>% summarise(crashes = n())
+dat1 <- left_join(dat1, counties, by = "County_Name")
+```
+
+```{r}
+dat1 %>% group_by("County_Name") %>% ggplot(aes(x = long, y = lat, fill=crashes)) + geom_polygon(aes(group=group))
 ```
 
 Can you find seasonal trends in accident occurrences in different states? Is summer or winter more dangerous? Why?
